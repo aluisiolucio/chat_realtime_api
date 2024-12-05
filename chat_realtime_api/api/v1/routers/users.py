@@ -12,7 +12,10 @@ from chat_realtime_api.infra.db.session import get_session
 from chat_realtime_api.infra.sqlalchemy_repositories.users import (
     SqlAlchemyUserRepository,
 )
-from chat_realtime_api.services.users import CreateUser, CreateUserInput
+from chat_realtime_api.services.users.create import (
+    CreateUserInput,
+    CreateUserService,
+)
 
 router = APIRouter(prefix='/api/v1', tags=['users'])
 
@@ -27,7 +30,7 @@ def create_user(
     session: Session = Depends(get_session),
 ):
     repo = SqlAlchemyUserRepository(session)
-    service = CreateUser(repo)
+    service = CreateUserService(repo)
     try:
         user = service.execute(
             CreateUserInput(

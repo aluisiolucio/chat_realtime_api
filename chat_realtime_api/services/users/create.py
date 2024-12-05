@@ -26,7 +26,7 @@ class CreateUserOutput:
     token_type: Optional[str] = None
 
 
-class CreateUser:
+class CreateUserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
 

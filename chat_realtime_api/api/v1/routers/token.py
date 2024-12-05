@@ -11,7 +11,11 @@ from chat_realtime_api.infra.db.session import get_session
 from chat_realtime_api.infra.sqlalchemy_repositories.users import (
     SqlAlchemyUserRepository,
 )
-from chat_realtime_api.services.token import RefreshToken, Token, TokenInput
+from chat_realtime_api.services.auth.token import (
+    RefreshTokenService,
+    TokenInput,
+    TokenService,
+)
 
 router = APIRouter(prefix='/api/v1/auth', tags=['auth'])
 
@@ -22,7 +26,7 @@ def login(
     session: Session = Depends(get_session),
 ):
     repo = SqlAlchemyUserRepository(session)
-    service = Token(repo)
+    service = TokenService(repo)
 
     try:
         token = service.execute(
@@ -47,7 +51,7 @@ def login(
 def refresh_access_token(
     current_user: Dict = Depends(get_current_user),
 ):
-    use_case = RefreshToken()
+    use_case = RefreshTokenService()
     refresh_token = use_case.execute(
         id=current_user['uid'],
         username=current_user['username'],

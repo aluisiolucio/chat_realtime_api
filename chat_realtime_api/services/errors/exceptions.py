@@ -16,6 +16,12 @@ class UserAlreadyExistsException(BusinessException):
         super().__init__(message)
 
 
+class RoomAlreadyExistsException(BusinessException):
+    def __init__(self, name: str):
+        message = f'Room with name {name} already exists.'
+        super().__init__(message)
+
+
 class InvalidCredentialsException(BusinessException):
     def __init__(self):
         message = 'Incorrect email or password'

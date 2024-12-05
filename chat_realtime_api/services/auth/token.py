@@ -27,7 +27,7 @@ class TokenOutput:
     token_type: Optional[str] = None
 
 
-class Token:
+class TokenService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
 
@@ -55,7 +55,7 @@ class Token:
         )
 
 
-class RefreshToken:
+class RefreshTokenService:
     @staticmethod
     def execute(id: UUID, username: str) -> TokenOutput:
         access_token = create_access_token(
