@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "chat-realtime-api"
+version = "0.1.0"
+description = ""
+authors = ["Aluisio Lucio <aluisio18lucio@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.*"
+fastapi = {extras = ["standard"], version = "^0.115.5"}
+sqlalchemy = "^2.0.36"
+pydantic-settings = "^2.6.1"
+alembic = "^1.14.0"
+pyjwt = "^2.10.0"
+pwdlib = {extras = ["argon2"], version = "^0.2.1"}
+psycopg2-binary = "^2.9.10"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+ruff = "^0.7.3"
+taskipy = "^1.14.0"
+
+[tool.ruff]
+line-length = 79
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+
+[tool.taskipy.tasks]
+lint = 'ruff check .; ruff check . --diff'
+format = 'ruff check . --fix; ruff format .'
+run = 'fastapi dev chat_realtime_api/app.py'
+test = 'pytest -vv -s -x'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
