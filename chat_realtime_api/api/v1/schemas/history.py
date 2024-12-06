@@ -4,8 +4,14 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
+class PaginationQuerySchema(BaseModel):
+    page: int = 1
+    size: int = 10
+
+
 class MessageSchema(BaseModel):
     id: UUID
+    room_id: UUID
     user_id: UUID
     content: str
     timestamp: datetime

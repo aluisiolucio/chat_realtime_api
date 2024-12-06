@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional
 from uuid import UUID
 
 
 @dataclass
 class UserRepoInput:
+    name: str
     username: str
     password: str
 
@@ -12,8 +12,9 @@ class UserRepoInput:
 @dataclass
 class UserRepoOutput:
     id: UUID
+    name: str
     username: str
-    password: Optional[str] = None
+    password: str | None = None
 
 
 class UserRepository:

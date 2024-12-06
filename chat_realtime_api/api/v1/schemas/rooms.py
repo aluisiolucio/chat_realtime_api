@@ -11,6 +11,7 @@ class RoomInputSchema(BaseModel):
 class RoomOutputSchema(BaseModel):
     id: UUID
     name: str
+    creator_id: UUID
     description: str | None = None
 
 

@@ -14,6 +14,7 @@ from chat_realtime_api.services.errors.exceptions import (
 
 @dataclass
 class CreateUserInput:
+    name: str
     username: str
     password: str
 
@@ -21,6 +22,7 @@ class CreateUserInput:
 @dataclass
 class CreateUserOutput:
     id: UUID
+    name: str
     username: str
     access_token: Optional[str] = None
     token_type: Optional[str] = None
@@ -34,6 +36,7 @@ class CreateUserService:
         hashed_password = get_password_hash(input.password)
 
         user_input = UserRepoInput(
+            name=input.name,
             username=input.username,
             password=hashed_password,
         )
@@ -45,5 +48,6 @@ class CreateUserService:
 
         return CreateUserOutput(
             id=user_output.id,
+            name=user_output.name,
             username=user_output.username,
         )

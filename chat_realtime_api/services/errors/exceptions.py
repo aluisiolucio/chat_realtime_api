@@ -22,6 +22,12 @@ class RoomAlreadyExistsException(BusinessException):
         super().__init__(message)
 
 
+class RoomNotFoundException(BusinessException):
+    def __init__(self, room_id: str):
+        message = f'Room with id {room_id} was not found.'
+        super().__init__(message)
+
+
 class InvalidCredentialsException(BusinessException):
     def __init__(self):
         message = 'Incorrect email or password'

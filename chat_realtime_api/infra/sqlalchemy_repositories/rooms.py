@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -26,6 +26,7 @@ class SqlAlchemyRoomRepository(RoomRepository):
         room_db = RoomModel(
             id=uuid4(),
             name=room_input.name,
+            creator_id=room_input.creator_id,
             description=room_input.description,
         )
 
@@ -36,6 +37,7 @@ class SqlAlchemyRoomRepository(RoomRepository):
         return RoomRepoOutput(
             id=room_db.id,
             name=room_db.name,
+            creator_id=room_db.creator_id,
             description=room_db.description,
         )
 
@@ -49,7 +51,15 @@ class SqlAlchemyRoomRepository(RoomRepository):
             RoomRepoOutput(
                 id=room_db.id,
                 name=room_db.name,
+                creator_id=room_db.creator_id,
                 description=room_db.description,
             )
             for room_db in rooms_db
         ]
+
+    def room_exists(self, room_id: UUID) -> bool:
+        room_db = self._session.scalar(
+            select(RoomModel).where(RoomModel.id == room_id)
+        )
+
+        return room_db is not None

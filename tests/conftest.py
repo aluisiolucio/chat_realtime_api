@@ -26,6 +26,7 @@ def token(client, user):
 def user(session):
     password = 'testtest'
     user = UserModel(
+        name='Teste',
         username='teste@test.com',
         password=get_password_hash(password),
         id=uuid4(),

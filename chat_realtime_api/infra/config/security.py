@@ -50,13 +50,14 @@ def get_current_user(
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         uid: str = payload.get('uid')
+        name: str = payload.get('name')
         username: str = payload.get('sub')
 
-        if not id or not username:
+        if not id or not username or not name:
             raise credentials_exception
     except DecodeError:
         raise credentials_exception
     except ExpiredSignatureError:
         raise credentials_exception
 
-    return {'uid': uid, 'username': username}
+    return {'uid': uid, 'name': name, 'username': username}

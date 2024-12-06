@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from chat_realtime_api.repositories.rooms import (
     RoomRepoInput,
@@ -12,6 +13,7 @@ from chat_realtime_api.services.errors.exceptions import (
 @dataclass
 class CreateRoomInput:
     name: str
+    creator_id: UUID
     description: str | None = None
 
 
@@ -19,6 +21,7 @@ class CreateRoomInput:
 class CreateRoomOutput:
     id: str
     name: str
+    creator_id: UUID
     description: str | None = None
 
 
@@ -29,6 +32,7 @@ class CreateRoomService:
     def execute(self, input: CreateRoomInput) -> CreateRoomOutput:
         room_input = RoomRepoInput(
             name=input.name,
+            creator_id=input.creator_id,
             description=input.description,
         )
 
@@ -40,5 +44,6 @@ class CreateRoomService:
         return CreateRoomOutput(
             id=room_output.id,
             name=room_output.name,
+            creator_id=room_output.creator_id,
             description=room_output.description,
         )

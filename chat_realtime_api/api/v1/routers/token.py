@@ -38,6 +38,7 @@ def login(
 
         return TokenOutputSchema(
             id=token.id,
+            name=token.name,
             username=token.username,
             access_token=token.access_token,
             token_type=token.token_type,
@@ -54,11 +55,13 @@ def refresh_access_token(
     use_case = RefreshTokenService()
     refresh_token = use_case.execute(
         id=current_user['uid'],
+        name=current_user['name'],
         username=current_user['username'],
     )
 
     return TokenOutputSchema(
         id=refresh_token.id,
+        name=current_user['name'],
         username=refresh_token.username,
         access_token=refresh_token.access_token,
         token_type=refresh_token.token_type,

@@ -34,6 +34,7 @@ def create_user(
     try:
         user = service.execute(
             CreateUserInput(
+                name=user_schema.name,
                 username=user_schema.username,
                 password=user_schema.password,
             )
@@ -41,6 +42,7 @@ def create_user(
 
         return UserOutputSchema(
             id=user.id,
+            name=user.name,
             username=user.username,
         )
     except Exception as e:

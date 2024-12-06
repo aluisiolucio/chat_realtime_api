@@ -8,16 +8,20 @@ from chat_realtime_api.infra.models.base import table_registry
 
 
 @table_registry.mapped_as_dataclass
-class RoomModel:
-    __tablename__ = 'rooms'
+class MessageModel:
+    __tablename__ = 'messages'
 
-    name: Mapped[str] = mapped_column(unique=True)
-    description: Mapped[str] = mapped_column(nullable=True)
+    content: Mapped[str] = mapped_column(nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         init=False, server_default=func.now()
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, nullable=False)
 
-    creator_id: Mapped[UUID] = mapped_column(
+    room_id: Mapped[UUID] = mapped_column(
+        ForeignKey('rooms.id'), nullable=True
+    )
+
+    user_id: Mapped[UUID] = mapped_column(
         ForeignKey('users.id'), nullable=False
     )

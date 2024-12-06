@@ -5,6 +5,7 @@ def test_create_user(client):
     response = client.post(
         '/api/v1/users',
         json={
+            'name': 'Alice',
             'username': 'alice@example.com',
             'password': 'secret',
         },
@@ -14,12 +15,14 @@ def test_create_user(client):
     assert 'id' in response.json()
     assert 'username' in response.json()
     assert response.json()['username'] == 'alice@example.com'
+    assert response.json()['name'] == 'Alice'
 
 
 def test_create_user_with_invalid_data(client):
     response = client.post(
         '/api/v1/users',
         json={
+            'name': '',
             'username': '',
             'password': '',
         },
@@ -33,6 +36,7 @@ def test_create_user_with_duplicated(client, user):
     response = client.post(
         '/api/v1/users',
         json={
+            'name': user.name,
             'username': user.username,
             'password': user.clean_password,
         },

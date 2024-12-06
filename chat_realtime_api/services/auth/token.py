@@ -22,6 +22,7 @@ class TokenInput:
 @dataclass
 class TokenOutput:
     id: UUID
+    name: str
     username: str
     access_token: Optional[str] = None
     token_type: Optional[str] = None
@@ -43,12 +44,14 @@ class TokenService:
         access_token = create_access_token(
             data={
                 'uid': str(user.id),
+                'name': user.name,
                 'sub': user.username,
             }
         )
 
         return TokenOutput(
             id=user.id,
+            name=user.name,
             username=user.username,
             access_token=access_token,
             token_type='bearer',
@@ -57,16 +60,18 @@ class TokenService:
 
 class RefreshTokenService:
     @staticmethod
-    def execute(id: UUID, username: str) -> TokenOutput:
+    def execute(id: UUID, name: str, username: str) -> TokenOutput:
         access_token = create_access_token(
             data={
                 'uid': str(id),
+                'name': name,
                 'sub': username,
             }
         )
 
         return TokenOutput(
             id=id,
+            name=name,
             username=username,
             access_token=access_token,
             token_type='bearer',

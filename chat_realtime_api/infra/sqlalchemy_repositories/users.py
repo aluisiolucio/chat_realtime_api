@@ -25,6 +25,7 @@ class SqlAlchemyUserRepository(UserRepository):
 
         user_db = UserModel(
             id=uuid4(),
+            name=user_input.name,
             username=user_input.username,
             password=user_input.password,
         )
@@ -35,6 +36,7 @@ class SqlAlchemyUserRepository(UserRepository):
 
         return UserRepoOutput(
             id=user_db.id,
+            name=user_db.name,
             username=user_db.username,
         )
 
@@ -48,6 +50,7 @@ class SqlAlchemyUserRepository(UserRepository):
 
         return UserRepoOutput(
             id=user_db.id,
+            name=user_db.name,
             username=user_db.username,
             password=user_db.password,
         )

@@ -1,12 +1,17 @@
 from http import HTTPStatus
-from typing import Dict
+from typing import Annotated, Dict
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from chat_realtime_api.api.v1.errors.error_handlers import handle_error
-from chat_realtime_api.api.v1.schemas.history import HistorySchema
+from chat_realtime_api.api.v1.schemas.history import (
+    HistorySchema,
+    MessageSchema,
+    PaginationQuerySchema,
+    PaginationSchema,
+)
 from chat_realtime_api.api.v1.schemas.rooms import (
     ListRoomOutputSchema,
     RoomInputSchema,
@@ -14,6 +19,9 @@ from chat_realtime_api.api.v1.schemas.rooms import (
 )
 from chat_realtime_api.infra.config.security import get_current_user
 from chat_realtime_api.infra.db.session import get_session
+from chat_realtime_api.infra.sqlalchemy_repositories.messages import (
+    SqlAlchemyMessageRepository,
+)
 from chat_realtime_api.infra.sqlalchemy_repositories.rooms import (
     SqlAlchemyRoomRepository,
 )
@@ -22,6 +30,7 @@ from chat_realtime_api.services.rooms.create import (
     CreateRoomService,
 )
 from chat_realtime_api.services.rooms.get import GetRoomService
+from chat_realtime_api.services.rooms.get_history import GetHistoryService
 
 router = APIRouter(prefix='/api/v1', tags=['rooms'])
 
@@ -34,7 +43,7 @@ router = APIRouter(prefix='/api/v1', tags=['rooms'])
 def create_room(
     room_schema: RoomInputSchema,
     session: Session = Depends(get_session),
-    _: Dict = Depends(get_current_user),
+    current_user: Dict = Depends(get_current_user),
 ):
     repo = SqlAlchemyRoomRepository(session)
     service = CreateRoomService(repo)
@@ -42,6 +51,7 @@ def create_room(
         room = service.execute(
             CreateRoomInput(
                 name=room_schema.name,
+                creator_id=UUID(current_user['uid']),
                 description=room_schema.description,
             )
         )
@@ -49,6 +59,7 @@ def create_room(
         return RoomOutputSchema(
             id=room.id,
             name=room.name,
+            creator_id=room.creator_id,
             description=room.description,
         )
     except Exception as e:
@@ -75,6 +86,7 @@ def list_rooms(
                 RoomOutputSchema(
                     id=room.id,
                     name=room.name,
+                    creator_id=room.creator_id,
                     description=room.description,
                 )
                 for room in rooms
@@ -91,12 +103,40 @@ def list_rooms(
     response_model=HistorySchema,
 )
 def get_room_history(
+    pagination_query_schema: Annotated[PaginationQuerySchema, Query()],
     room_id: UUID,
     session: Session = Depends(get_session),
     _: Dict = Depends(get_current_user),
 ):
+    msg_repo = SqlAlchemyMessageRepository(session)
+    room_repo = SqlAlchemyRoomRepository(session)
+    service = GetHistoryService(msg_repo, room_repo)
     try:
-        pass
+        history = service.execute(
+            room_id=room_id,
+            page=pagination_query_schema.page,
+            size=pagination_query_schema.size,
+        )
+
+        return HistorySchema(
+            room_id=room_id,
+            messages=[
+                MessageSchema(
+                    id=message.id,
+                    room_id=message.room_id,
+                    user_id=message.user_id,
+                    content=message.content,
+                    timestamp=message.timestamp,
+                )
+                for message in history.messages
+            ],
+            pagination=PaginationSchema(
+                current_page=history.current_page,
+                page_size=history.page_size,
+                total_pages=history.total_pages,
+                total_messages=history.total_messages,
+            ),
+        )
     except Exception as e:
         print(e)
         raise handle_error(e)

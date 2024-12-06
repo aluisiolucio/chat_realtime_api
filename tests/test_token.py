@@ -23,4 +23,5 @@ def test_refresh_token(client, token):
     assert response.status_code == HTTPStatus.OK
     assert 'access_token' in data
     assert 'token_type' in data
+    assert data['name'] == 'Teste'
     assert data['token_type'] == 'bearer'

@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from chat_realtime_api.services.errors.exceptions import (
     InvalidCredentialsException,
     RoomAlreadyExistsException,
+    RoomNotFoundException,
     UserAlreadyExistsException,
     UserNotFoundException,
 )
@@ -14,6 +15,7 @@ def handle_error(exception: Exception) -> HTTPException:
         UserAlreadyExistsException: (409, 'UserAlreadyExists'),
         InvalidCredentialsException: (401, 'InvalidCredentials'),
         RoomAlreadyExistsException: (409, 'RoomAlreadyExists'),
+        RoomNotFoundException: (404, 'RoomNotFound'),
     }
 
     for exc_type, (status_code, error) in exception_map.items():

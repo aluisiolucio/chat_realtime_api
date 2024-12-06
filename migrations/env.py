@@ -8,6 +8,7 @@ from chat_realtime_api.infra.models.base import table_registry
 
 from chat_realtime_api.infra.models.users import UserModel
 from chat_realtime_api.infra.models.rooms import RoomModel
+from chat_realtime_api.infra.models.messages import MessageModel
 
 config = context.config
 config.set_main_option('sqlalchemy.url', Settings().DATABASE_URL)
