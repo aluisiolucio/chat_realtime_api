@@ -1,0 +1,31 @@
+services:
+  chat_realtime_db:
+    image: bitnami/postgresql:latest
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/bitnami/postgresql
+
+  chat_realtime_app:
+    image: chat_realtime_app
+    entrypoint: ./entrypoint.sh
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - chat_realtime_db
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@chat_realtime_db:5432/${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+
+volumes:
+  pgdata:
