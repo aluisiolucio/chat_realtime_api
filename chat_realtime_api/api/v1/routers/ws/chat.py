@@ -1,9 +1,9 @@
-from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Annotated, Dict, List
 from uuid import UUID
 
 import anyio
-from broadcaster import Broadcast
 from fastapi import (
     APIRouter,
     Depends,
@@ -12,7 +12,7 @@ from fastapi import (
     WebSocketDisconnect,
     status,
 )
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from chat_realtime_api.api.v1.errors.error_handlers import handle_error
@@ -21,7 +21,6 @@ from chat_realtime_api.infra.config.security import (
     get_current_user,
     get_current_user_ws,
 )
-from chat_realtime_api.infra.config.settings import Settings
 from chat_realtime_api.infra.db.session import get_session
 from chat_realtime_api.infra.sqlalchemy_repositories.messages import (
     SqlAlchemyMessageRepository,
@@ -34,6 +33,13 @@ from chat_realtime_api.services.messages.create import (
     CreateMessageService,
 )
 from chat_realtime_api.services.messages.get import GetMessageService
+
+
+@dataclass
+class Message:
+    content: str
+    user: str
+    timestamp: datetime
 
 
 class ConnectionManager:
@@ -53,7 +59,7 @@ class ConnectionManager:
                 del self.active_connections[room_id]
 
     async def broadcast(
-        self, room_id: str, message, exclude: List[WebSocket] = None
+        self, room_id: str, message: Message, exclude: List[WebSocket] = None
     ):
         if room_id in self.active_connections:
             for connection in self.active_connections[room_id]:
@@ -61,76 +67,21 @@ class ConnectionManager:
                     continue
 
                 try:
-                    if isinstance(message, str):
-                        await connection.send_json({'content': message})
-                    else:
-                        await connection.send_json({
-                            'content': message.content,
-                            'timestamp': message.timestamp.strftime(
-                                '%Y-%m-%d %H:%M:%S'
-                            ),
-                        })
-                except Exception:
+                    await connection.send_json({
+                        'content': message.content,
+                        'user': message.user,
+                        'timestamp': message.timestamp.strftime(
+                            '%Y-%m-%d %H:%M:%S'
+                        ),
+                    })
+                except Exception as e:
+                    print(e)
                     self.disconnect(room_id, connection)
 
 
 manager = ConnectionManager()
-broadcast = Broadcast(Settings().DATABASE_URL)
 
-
-async def chatroom_ws_receiver(
-    websocket: WebSocket,
-    channel: str,
-    service: CreateMessageService,
-    current_user: Dict,
-):
-    async for message in websocket.iter_json():
-        if not isinstance(message, dict) or 'content' not in message:
-            await websocket.send_json({'error': 'Invalid message format.'})
-            continue
-
-        try:
-            msg = service.execute(
-                CreateMessageInput(
-                    room_id=channel,
-                    content=message['content'],
-                    user_id=current_user['uid'],
-                )
-            )
-        except Exception as e:
-            print(e)
-            raise handle_error(e)
-
-        await broadcast.publish(
-            channel=channel,
-            message=msg.content,
-        )
-
-
-async def chatroom_ws_sender(websocket: WebSocket, room_id: str):
-    async with broadcast.subscribe(channel=room_id) as subscriber:
-        async for event in subscriber:
-            await websocket.send_json({
-                'content': event.message,
-            })
-
-
-@asynccontextmanager
-async def lifespan(app):
-    await broadcast.connect()
-    try:
-        yield
-    finally:
-        await broadcast.disconnect()
-
-
-router = APIRouter(prefix='/api/v1', tags=['chat'], lifespan=lifespan)
-
-
-@router.get('/chat', response_class=HTMLResponse)
-async def get_index():
-    with open('index.html', 'r', encoding='utf-8') as file:
-        return HTMLResponse(content=file.read())
+router = APIRouter(prefix='/api/v1', tags=['chat'])
 
 
 @router.websocket('/chat/{room_id}')
@@ -153,9 +104,14 @@ async def chat_websocket(
 
     room_id_str = str(room_id)
     await manager.connect(room_id_str, websocket)
+
     await manager.broadcast(
         room_id_str,
-        f'User {current_user["name"]} joined the chat.',
+        message=Message(
+            content=f'User {current_user["name"]} has joined the chat.',
+            user=current_user['name'],
+            timestamp=datetime.now(),
+        ),
         exclude=[websocket],
     )
 
@@ -169,23 +125,59 @@ async def chat_websocket(
             })
     except Exception as e:
         print(e)
-        await websocket.send_json({'error': 'Error fetching messages.'})
+        await websocket.send_json({'error': str(e)})
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
 
     try:
         async with anyio.create_task_group() as task_group:
 
             async def run_chatroom_ws_receiver() -> None:
-                await chatroom_ws_receiver(
-                    websocket, room_id_str, create_service, current_user
-                )
+                async for message in websocket.iter_json():
+                    if (
+                        not isinstance(message, dict)
+                        or 'content' not in message
+                    ):
+                        await websocket.send_json({
+                            'error': 'Invalid message format.'
+                        })
+                        continue
+
+                    try:
+                        msg = create_service.execute(
+                            CreateMessageInput(
+                                room_id=room_id_str,
+                                content=message['content'],
+                                user_id=current_user['uid'],
+                            )
+                        )
+
+                        await manager.broadcast(
+                            room_id_str,
+                            message=Message(
+                                content=msg.content,
+                                user=current_user['name'],
+                                timestamp=msg.timestamp,
+                            ),
+                            exclude=[websocket],
+                        )
+                    except Exception as e:
+                        print(e)
+                        raise handle_error(e)
+
                 task_group.cancel_scope.cancel()
 
             task_group.start_soon(run_chatroom_ws_receiver)
-            await chatroom_ws_sender(websocket, room_id_str)
     except WebSocketDisconnect:
         manager.disconnect(room_id_str, websocket)
         await manager.broadcast(
-            room_id_str, f'User {current_user["name"]} has left the chat.'
+            room_id_str,
+            message=Message(
+                content=f'User {current_user["name"]} has left the chat.',
+                user=current_user['name'],
+                timestamp=datetime.now(),
+            ),
+            exclude=[websocket],
         )
 
 
