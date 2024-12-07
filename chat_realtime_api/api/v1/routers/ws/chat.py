@@ -1,24 +1,20 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Annotated, Dict, List
+from typing import Dict, List
 from uuid import UUID
 
 import anyio
 from fastapi import (
     APIRouter,
     Depends,
-    Query,
     WebSocket,
     WebSocketDisconnect,
     status,
 )
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from chat_realtime_api.api.v1.errors.error_handlers import handle_error
-from chat_realtime_api.api.v1.schemas.token import QueryParams
 from chat_realtime_api.infra.config.security import (
-    get_current_user,
     get_current_user_ws,
 )
 from chat_realtime_api.infra.db.session import get_session
@@ -179,31 +175,3 @@ async def chat_websocket(
             ),
             exclude=[websocket],
         )
-
-
-@router.get(
-    '/chat/{room_id}',
-    include_in_schema=True,
-    summary='WebSocket Documentation',
-)
-def websocket_docs(
-    room_id: str,
-    pagination_query_schema: Annotated[QueryParams, Query()],
-    current_user: Dict = Depends(get_current_user),
-):
-    """
-    **WebSocket Endpoint**
-
-    Use este endpoint para se conectar ao chat via WebSocket.
-
-    **URL:** `ws://localhost:8000/chat/{room_id}`
-
-    **Parâmetros:**
-    - `room_id`: O ID da sala de chat.
-
-    **Query Parameters:**
-    - `token`: Token JWT no formato `Bearer <token>`
-    """
-    return JSONResponse({
-        'detail': 'Use WebSocket em ws://localhost:8000/chat/{room_id}'
-    })
