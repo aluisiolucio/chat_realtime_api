@@ -46,7 +46,7 @@ class CreateMessageService:
         return CreateMessageOutput(
             id=room_output.id,
             room_id=room_output.room_id,
-            user_id=room_output.user_id,
+            user_id=room_output.user.id,
             content=room_output.content,
             timestamp=room_output.timestamp,
         )

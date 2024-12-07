@@ -43,3 +43,6 @@ class MessageRepository:
         self, room_id: UUID, page: int, size: int
     ) -> HistoryRepoOutput:
         raise NotImplementedError
+
+    def get_messages_by_room_id(self, room_id: UUID) -> MessageRepoOutput:
+        raise NotImplementedError

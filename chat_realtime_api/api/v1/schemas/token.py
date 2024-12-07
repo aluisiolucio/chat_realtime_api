@@ -3,6 +3,10 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
+class QueryParams(BaseModel):
+    token: str
+
+
 class TokenOutputSchema(BaseModel):
     id: UUID
     name: str
