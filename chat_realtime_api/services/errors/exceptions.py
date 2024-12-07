@@ -6,7 +6,7 @@ class BusinessException(Exception):
 
 class UserNotFoundException(BusinessException):
     def __init__(self, username: str):
-        message = f'User with username {username} was not found.'
+        message = f'User {username} was not found.'
         super().__init__(message)
 
 

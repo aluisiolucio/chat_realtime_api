@@ -9,10 +9,16 @@ from chat_realtime_api.services.errors.exceptions import RoomNotFoundException
 
 
 @dataclass
+class UserOutput:
+    id: str
+    name: str
+
+
+@dataclass
 class MessageOutput:
     id: str
     room_id: str
-    user_id: str
+    user: UserOutput
     content: str
     timestamp: str
 
@@ -28,7 +34,11 @@ class GetHistoryOutput:
 
 
 class GetHistoryService:
-    def __init__(self, msg_repo: MessageRepository, room_repo: RoomRepository):
+    def __init__(
+        self,
+        msg_repo: MessageRepository,
+        room_repo: RoomRepository,
+    ):
         self.msg_repo = msg_repo
         self.room_repo = room_repo
 
@@ -42,7 +52,19 @@ class GetHistoryService:
 
         return GetHistoryOutput(
             room_id=room_output.room_id,
-            messages=room_output.messages,
+            messages=[
+                MessageOutput(
+                    id=message.id,
+                    room_id=message.room_id,
+                    user=UserOutput(
+                        id=message.user.id,
+                        name=message.user.name,
+                    ),
+                    content=message.content,
+                    timestamp=message.timestamp,
+                )
+                for message in room_output.messages
+            ],
             current_page=room_output.current_page,
             page_size=room_output.page_size,
             total_pages=room_output.total_pages,

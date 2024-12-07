@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chat_realtime_api.infra.models.base import table_registry
 
@@ -25,3 +25,4 @@ class MessageModel:
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey('users.id'), nullable=False
     )
+    user: Mapped['UserModel'] = relationship(back_populates='messages')  # type: ignore # noqa: F821

@@ -28,6 +28,7 @@ class SqlAlchemyUserRepository(UserRepository):
             name=user_input.name,
             username=user_input.username,
             password=user_input.password,
+            messages=[],
         )
 
         self._session.add(user_db)

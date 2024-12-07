@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
 
@@ -10,12 +11,18 @@ class MessageRepoInput:
 
 
 @dataclass
+class UserRepoOutput:
+    id: UUID
+    name: str
+
+
+@dataclass
 class MessageRepoOutput:
     id: UUID
     room_id: UUID
-    user_id: UUID
+    user: UserRepoOutput
     content: str
-    timestamp: str
+    timestamp: datetime
 
 
 @dataclass

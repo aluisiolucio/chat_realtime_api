@@ -11,6 +11,7 @@ from chat_realtime_api.api.v1.schemas.history import (
     MessageSchema,
     PaginationQuerySchema,
     PaginationSchema,
+    UserSchema,
 )
 from chat_realtime_api.api.v1.schemas.rooms import (
     ListRoomOutputSchema,
@@ -110,6 +111,7 @@ def get_room_history(
 ):
     msg_repo = SqlAlchemyMessageRepository(session)
     room_repo = SqlAlchemyRoomRepository(session)
+
     service = GetHistoryService(msg_repo, room_repo)
     try:
         history = service.execute(
@@ -122,13 +124,16 @@ def get_room_history(
             room_id=room_id,
             messages=[
                 MessageSchema(
-                    id=message.id,
-                    room_id=message.room_id,
-                    user_id=message.user_id,
-                    content=message.content,
-                    timestamp=message.timestamp,
+                    id=msg.id,
+                    room_id=msg.room_id,
+                    user=UserSchema(
+                        id=msg.user.id,
+                        name=msg.user.name,
+                    ),
+                    content=msg.content,
+                    timestamp=msg.timestamp,
                 )
-                for message in history.messages
+                for msg in history.messages
             ],
             pagination=PaginationSchema(
                 current_page=history.current_page,

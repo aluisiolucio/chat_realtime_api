@@ -9,10 +9,15 @@ class PaginationQuerySchema(BaseModel):
     size: int = 10
 
 
+class UserSchema(BaseModel):
+    id: UUID
+    name: str
+
+
 class MessageSchema(BaseModel):
     id: UUID
     room_id: UUID
-    user_id: UUID
+    user: UserSchema
     content: str
     timestamp: datetime
 

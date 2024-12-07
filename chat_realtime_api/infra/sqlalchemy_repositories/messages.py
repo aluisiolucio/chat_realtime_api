@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from chat_realtime_api.infra.models.messages import MessageModel
@@ -9,6 +10,7 @@ from chat_realtime_api.repositories.messages import (
     MessageRepoInput,
     MessageRepoOutput,
     MessageRepository,
+    UserRepoOutput,
 )
 
 
@@ -22,7 +24,7 @@ class SqlAlchemyMessageRepository(MessageRepository):
             room_id=msg_input.room_id,
             content=msg_input.content,
             user_id=msg_input.user_id,
-            timestamp=msg_input.timestamp,
+            timestamp=datetime.now().isoformat(),
         )
 
         self._session.add(message_db)
@@ -58,10 +60,10 @@ class SqlAlchemyMessageRepository(MessageRepository):
             )
 
         total_messages = self._session.scalars(
-            select(MessageModel)
-            .filter(MessageModel.room_id == room_id)
-            .count()
-        )
+            select(func.count(MessageModel.id)).filter(
+                MessageModel.room_id == room_id
+            )
+        ).first()
 
         return HistoryRepoOutput(
             room_id=room_id,
@@ -69,7 +71,10 @@ class SqlAlchemyMessageRepository(MessageRepository):
                 MessageRepoOutput(
                     id=msg_db.id,
                     room_id=msg_db.room_id,
-                    user_id=msg_db.user_id,
+                    user=UserRepoOutput(
+                        id=msg_db.user.id,
+                        name=msg_db.user.name,
+                    ),
                     content=msg_db.content,
                     timestamp=msg_db.timestamp,
                 )
