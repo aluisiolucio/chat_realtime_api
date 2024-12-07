@@ -183,13 +183,13 @@ A documentação interativa está acessível via Swagger UI em: `http://localhos
   - **POST /api/v1/auth/refresh_token**
   - Saída: Token JWT.
 
-## 💻 Interface Cliente
+<!-- ## 💻 Interface Cliente
 
 O repositório inclui um cliente WebSocket básico em HTML para interagir com a API. Para utilizá-lo:
 
 1. Acesse a rota `/chat` para carregar o cliente.
 2. Insira o ID da sala e o token JWT.
-3. Envie mensagens e observe-as em tempo real.
+3. Envie mensagens e observe-as em tempo real. -->
 
 ## 🧪 Testes
 
@@ -210,7 +210,7 @@ Para executar os testes:
    Use o comando:
 
    ```bash
-   poetry run pytest
+   poetry run task test
    ```
 
 ## 🤝 Contribuição
