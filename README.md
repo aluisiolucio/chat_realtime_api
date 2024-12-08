@@ -129,6 +129,27 @@ A estrutura do projeto está organizada da seguinte forma:
    ACCESS_TOKEN_EXPIRE_MINUTES=<Tempo para expiração do token>
    ```
 
+   **`DATABASE_URL`**: 
+      - Define a URL completa para se conectar ao banco de dados PostgreSQL. Inclui o usuário, senha, host (endereço do banco), porta e o nome do banco.
+
+   **`DB_USER`**:
+      - Usuário do banco de dados.
+
+   **`DB_PASSWORD`**:
+      - A senha associada ao usuário especificado em `DB_USER`.
+
+   **`DB_NAME`**:
+      - Nome do banco de dados a ser utilizado.
+
+   **`SECRET_KEY`**:
+      - Uma string secreta usada para assinar os tokens JWT.
+
+   **`ALGORITHM`**:
+      - O algoritmo de assinatura do JWT. O valor mais comum é `HS256`.
+
+   **`ACCESS_TOKEN_EXPIRE_MINUTES`**:
+      - Define por quanto tempo o token JWT gerado será válido. Representado em minutos.
+
 3. **Execução com Docker**
 
    Certifique-se de ter **Docker** e **Docker Compose** instalados.
