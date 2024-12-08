@@ -120,6 +120,7 @@ A estrutura do projeto está organizada da seguinte forma:
    Copie o arquivo `.env.example` para `.env` e configure as variáveis:
 
    ```env
+   DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname>
    DB_USER=<user>
    DB_PASSWORD=<password>
    DB_NAME=<dbname>
