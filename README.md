@@ -120,7 +120,6 @@ A estrutura do projeto está organizada da seguinte forma:
    Copie o arquivo `.env.example` para `.env` e configure as variáveis:
 
    ```env
-   DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname>
    DB_USER=<user>
    DB_PASSWORD=<password>
    DB_NAME=<dbname>
@@ -182,14 +181,6 @@ A documentação interativa está acessível via Swagger UI em: `http://localhos
 - **Refresh Token**
   - **POST /api/v1/auth/refresh_token**
   - Saída: Token JWT.
-
-<!-- ## 💻 Interface Cliente
-
-O repositório inclui um cliente WebSocket básico em HTML para interagir com a API. Para utilizá-lo:
-
-1. Acesse a rota `/chat` para carregar o cliente.
-2. Insira o ID da sala e o token JWT.
-3. Envie mensagens e observe-as em tempo real. -->
 
 ## 🧪 Testes
 

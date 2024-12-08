@@ -54,6 +54,18 @@ class ConnectionManager:
             if not self.active_connections[room_id]:
                 del self.active_connections[room_id]
 
+    async def send_message(  # noqa: PLR6301
+        self, message: Message, websocket: WebSocket
+    ):
+        await websocket.send_json({
+            'content': message.content,
+            'user': message.user,
+            'timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+        })
+
+    async def send_json(self, data: Dict, websocket: WebSocket):  # noqa: PLR6301
+        await websocket.send_json(data)
+
     async def broadcast(
         self, room_id: str, message: Message, exclude: List[WebSocket] = None
     ):
@@ -74,6 +86,9 @@ class ConnectionManager:
                     print(e)
                     self.disconnect(room_id, connection)
 
+    async def close(self, code: int, websocket: WebSocket):  # noqa: PLR6301
+        await websocket.close(code=code)
+
 
 manager = ConnectionManager()
 
@@ -89,7 +104,7 @@ async def chat_websocket(
     try:
         current_user = await get_current_user_ws(websocket)
     except Exception:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        await manager.close(status.WS_1008_POLICY_VIOLATION, websocket)
         return
 
     room_repo = SqlAlchemyRoomRepository(session)
@@ -114,15 +129,21 @@ async def chat_websocket(
     try:
         messages = get_service.execute(room_id)
         for msg in reversed(messages):
-            await websocket.send_json({
-                'content': msg.content,
-                'user': msg.user.name,
-                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            })
+            await manager.send_message(
+                Message(
+                    content=msg.content,
+                    user=msg.user.name,
+                    timestamp=msg.timestamp,
+                ),
+                websocket,
+            )
     except Exception as e:
         print(e)
-        await websocket.send_json({'error': str(e)})
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        await manager.send_json(
+            {'error': 'Failed to fetch messages.'},
+            websocket,
+        )
+        await manager.close(status.WS_1008_POLICY_VIOLATION, websocket)
         return
 
     try:
@@ -134,9 +155,10 @@ async def chat_websocket(
                         not isinstance(message, dict)
                         or 'content' not in message
                     ):
-                        await websocket.send_json({
-                            'error': 'Invalid message format.'
-                        })
+                        await manager.send_json(
+                            {'error': 'Invalid message format.'},
+                            websocket,
+                        )
                         continue
 
                     try:
