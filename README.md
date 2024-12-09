@@ -212,6 +212,8 @@ Para executar os testes:
 
    Caso ainda não tenha o Poetry instalado, siga as instruções oficiais [aqui](https://python-poetry.org/docs/#installation).
 
+   OBS: Para executar os testes, o arquivo `.env` precisa estar configurado corretamente.
+
    Instale as dependências:
 
    ```bash
