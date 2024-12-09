@@ -168,7 +168,7 @@ A documentação interativa está acessível via Swagger UI em: `http://localhos
 
 #### **1. WebSocket**
 - **Conectar ao WebSocket**
-  - **URL:** `ws://localhost:8000/api/v1/chat/{room_id}`
+  - **URL:** `ws://localhost:8000/api/v1/chat/{room_id}?token=<token>`
   - **Parâmetros Requeridos:**
     - `room_id` ID da sala
     - `token:` Token JWT no formato `Bearer <token>`
