@@ -14,6 +14,16 @@ from chat_realtime_api.infra.models.users import UserModel
 
 
 @pytest.fixture
+def client_ws(client, token):
+    def connect(room_id):
+        return client.websocket_connect(
+            f'/api/v1/chat/{room_id}?token={token}',
+        )
+
+    return connect
+
+
+@pytest.fixture
 def token(client, user):
     response = client.post(
         '/api/v1/auth/login',

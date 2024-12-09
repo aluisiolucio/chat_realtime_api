@@ -75,13 +75,7 @@ class ConnectionManager:
                     continue
 
                 try:
-                    await connection.send_json({
-                        'content': message.content,
-                        'user': message.user,
-                        'timestamp': message.timestamp.strftime(
-                            '%Y-%m-%d %H:%M:%S'
-                        ),
-                    })
+                    await self.send_message(message, connection)
                 except Exception as e:
                     print(e)
                     self.disconnect(room_id, connection)
@@ -164,9 +158,9 @@ async def chat_websocket(
                     try:
                         msg = create_service.execute(
                             CreateMessageInput(
-                                room_id=room_id_str,
+                                room_id=room_id,
                                 content=message['content'],
-                                user_id=current_user['uid'],
+                                user_id=UUID(current_user['uid']),
                             )
                         )
 

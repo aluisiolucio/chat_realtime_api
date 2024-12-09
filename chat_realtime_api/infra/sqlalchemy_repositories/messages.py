@@ -29,7 +29,7 @@ class SqlAlchemyMessageRepository(MessageRepository):
             room_id=msg_input.room_id,
             content=msg_input.content,
             user_id=msg_input.user_id,
-            timestamp=datetime.now().isoformat(),
+            timestamp=datetime.now(),
             user=user,
         )
 
